@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Indus Valley Topic Spinner</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+    }
+    canvas {
+      border: 8px solid #333;
+      border-radius: 50%;
+      background: white;
+    }
+    #topic {
+      font-size: 36px;
+      font-weight: bold;
+      margin-top: 30px;
+      text-align: center;
+    }
+    button {
+      font-size: 24px;
+      padding: 12px 24px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="wheel" width="400" height="400"></canvas>
+  <button onclick="spin()">Spin</button>
+  <p id="topic"></p>
+
+  <script>
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+    let slices = 12;
+    const arc = 2 * Math.PI / slices;
+    let angle = 0;
+    let spinning = false;
+    let topics = [];
+
+    // Fetch topics from Apps Script (list mode)
+    fetch("https://script.google.com/macros/s/AKfycbx1xe1dvM-sCay-LhYs-8D9I6Wb0WR_WHetr7PuWjEjiTqau2j97O2ZdV-mV2OOhWxO/exec")
+      .then(response => response.json())
+      .then(data => {
+        topics = data;
+        drawWheel();
+      });
+
+    function drawWheel(blur=false) {
+      ctx.clearRect(0,0,400,400);
+      for (let i=0; i<slices; i++) {
+        ctx.beginPath();
+        ctx.fillStyle = i % 2 === 0 ? "#f4a261" : "#2a9d8f";
+        ctx.moveTo(200,200);
+        ctx.arc(200,200,200,arc*i+angle,arc*(i+1)+angle);
+        ctx.closePath();
+        ctx.fill();
+
+        // Text
+        ctx.save();
+        ctx.translate(200,200);
+        ctx.rotate(arc*i + angle + arc/2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#000";
+        ctx.font = "16px Arial";
+        ctx.filter = blur ? "blur(4px)" : "none";
+        ctx.fillText(topics[i] || "", 180, 10);
+        ctx.restore();
+      }
+    }
+
+    function spin() {
+      if (spinning || topics.length === 0) return;
+      spinning = true;
+      let spinTime = 0;
+      let spinDuration = 4000; // 4 seconds
+      let spinAngle = Math.random() * 10 + 10;
+
+      function rotate() {
+        spinTime += 30;
+        if (spinTime >= spinDuration) {
+          spinning = false;
+          // Ask Apps Script for next topic
+          fetch("https://script.google.com/macros/s/AKfycbw5qlPgNoHMKWOtZwo9A-pwy1tuzedmjhq5ZRs4NiEmOX-zUq4-9r_bf8YPT38AGtG0nQ/exec")
+            .then(response => response.text())
+            .then(chosen => {
+              document.getElementById("topic").innerText =
+                "Your Topic is " + chosen + "\n\nTell 2 to 3 lines about it.";
+              drawWheel(false);
+            });
+          return;
+        }
+        angle += (spinAngle * Math.PI/180);
+        drawWheel(true); // blurred while spinning
+        setTimeout(rotate,30);
+      }
+      rotate();
+    }
+  </script>
+</body>
+</html>
