@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Topic Spinner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      color: #333;
+    }
+    #result {
+      font-size: 24px;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #006699;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #006699;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #004466;
+    }
+  </style>
+</head>
+<body>
+  <h1>Topic Spinner</h1>
+  <button onclick="spin()">Spin!</button>
+  <div id="result"></div>
+
+  <script>
+    // Use your actual Apps Script Web App URL here
+    const scriptURL = "https://script.google.com/a/macros/beaconite.edu.pk/s/AKfycbxxY9ep2pz11qNSaPC_2SgOJZj0BXRVBln0DdEJDO_74delfkOuxdiOIml264XEGsB57A/exec";
+
+    function spin() {
+      fetch(scriptURL + "?action=spinTopic")
+        .then(response => response.text())
+        .then(result => {
+          document.getElementById("result").innerText = result;
+        })
+        .catch(error => {
+          document.getElementById("result").innerText = "Error: " + error;
+        });
+    }
+  </script>
+</body>
+</html>
+
